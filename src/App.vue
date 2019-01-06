@@ -1,70 +1,101 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">    
-      <section class="row">
-        <div class="small-6 columns">
-            <h1 class="text-center">YOU</h1>
-            <div class="healthbar">
-                <div class="healthbar text-center" style="background-color: green; margin: 0; color: white;">
-                      {{ playerHealth }}
-                </div>
-            </div>
+    <img alt="Vue logo" src="./assets/logo.png">
+    <h3>game is runnig?: {{ gameIsRunnig }}</h3>
+    <section class="row">
+      <div class="small-6 columns">
+        <h1 class="text-center">YOU</h1>
+        <div class="healthbar">
+          <div
+            class="healthbar text-center"
+            style="background-color: green; margin: 0; color: white;"
+            :style="{width: playerHealth + '%'}"
+            >
+            {{ playerHealth }}
+          
+          </div>
         </div>
-        <div class="small-6 columns">
-            <h1 class="text-center">MONSTER</h1>
-            <div class="healthbar">
-                <div class="healthbar text-center" style="background-color: green; margin: 0; color: white;">
-                    {{ MonsterHealth }}                     
-                </div>
-            </div>
+      </div>
+      <div class="small-6 columns">
+        <h1 class="text-center">MONSTER</h1>
+        <div class="healthbar">
+          <div
+            class="healthbar text-center"
+            style="background-color: green; margin: 0; color: white;"
+            :style="{width: MonsterHealth + '%'}"
+            >
+            {{ MonsterHealth }}
+          
+          </div>
         </div>
+      </div>
     </section>
     <section class="row controls">
-        <div class="small-12 columns">
-            <button id="start-game">START NEW GAME</button>
-        </div>
+      <div class="small-12 columns">
+        <button id="start-game" @click="startGame">START NEW GAME</button>
+      </div>
     </section>
     <section class="row controls">
-        <div class="small-12 columns">
-            <button id="attack">ATTACK</button>
-            <button id="special-attack">SPECIAL ATTACK</button>
-            <button id="heal">HEAL</button>
-            <button id="give-up">GIVE UP</button>
-        </div>
+      <div class="small-12 columns">
+        <button id="attack" @click="attack">ATTACK</button>
+        <button id="special-attack" @click="specialAttack">SPECIAL ATTACK</button>
+        <button id="heal" @click="heal">HEAL</button>
+        <button id="give-up" @click="giveUp">GIVE UP</button>
+      </div>
     </section>
     <section class="row log">
-        <div class="small-12 columns">
-            <ul>
-                <li>
-
-                </li>
-            </ul>
-        </div>
+      <div class="small-12 columns">
+        <ul>
+          <li></li>
+        </ul>
+      </div>
     </section>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'app', 
+  name: "app",
   data: function() {
     return {
-    playerHealth: 100,
-    MonsterHealth: 100,
-    gameIsRunnig: false,
-    }
+      playerHealth: 30,
+      MonsterHealth: 45,
+      gameIsRunnig: false
+    };
   },
   methods: {
-    write: function(){
-      console.log(gameIsRunnig);
-    }
+   monsterIsAttacking(interval){
+     setInterval(function(){
+       this.playerHealth =  this.playerHealth - 2;
+       var result = (typeof this.playerHealth === 'number');
+       console.log(this.playerHealth + " is number?:" + result);
+       //NaN is number?:true
+     }, interval);
+    
+   },
+    startGame() {
+      this.gameIsRunnig = true;
+      this.playerHealth = 100;
+      this.MonsterHealth = 100;
+      console.log("game status set to: " + this.gameIsRunnig);
+      this.monsterIsAttacking(1000);
+    },    
+    giveUp() {
+      this.gameIsRunnig = false;
+      this.playerHealth = 0;
+      this.MonsterHealth = 0;
+      console.log("game status set to: " + this.gameIsRunnig);
+    },
+    attack(){},
+    specialAttack(){},
+    heal(){}    
   }
-}
+};
 </script>
 
 <style lang="scss">
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -72,97 +103,98 @@ export default {
   margin-top: 60px;
 }
 .text-center {
-    text-align: center;
+  text-align: center;
 }
 
 .healthbar {
-    width: 80%;
-    height: 40px;
-    background-color: #eee;
-    margin: auto;
-    transition: width 500ms;
+  
+  height: 40px;
+  background-color: #eee;
+  margin: auto;
+  transition: width 500ms;
 }
 
-.controls, .log {
-    margin-top: 30px;
-    text-align: center;
-    padding: 10px;
-    border: 1px solid #ccc;
-    box-shadow: 0px 3px 6px #ccc;
+.controls,
+.log {
+  margin-top: 30px;
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  box-shadow: 0px 3px 6px #ccc;
 }
 
 .turn {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    font-weight: bold;
-    font-size: 22px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  font-size: 22px;
 }
 
 .log ul {
-    list-style: none;
-    font-weight: bold;
-    text-transform: uppercase;
+  list-style: none;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 .log ul li {
-    margin: 5px;
+  margin: 5px;
 }
 
 .log ul .player-turn {
-    color: blue;
-    background-color: #e4e8ff;
+  color: blue;
+  background-color: #e4e8ff;
 }
 
 .log ul .monster-turn {
-    color: red;
-    background-color: #ffc0c1;
+  color: red;
+  background-color: #ffc0c1;
 }
 
 button {
-    font-size: 20px;
-    background-color: #eee;
-    padding: 12px;
-    box-shadow: 0 1px 1px black;
-    margin: 10px;
+  font-size: 20px;
+  background-color: #eee;
+  padding: 12px;
+  box-shadow: 0 1px 1px black;
+  margin: 10px;
 }
 
 #start-game {
-    background-color: #aaffb0;
+  background-color: #aaffb0;
 }
 
 #start-game:hover {
-    background-color: #76ff7e;
+  background-color: #76ff7e;
 }
 
 #attack {
-    background-color: #ff7367;
+  background-color: #ff7367;
 }
 
 #attack:hover {
-    background-color: #ff3f43;
+  background-color: #ff3f43;
 }
 
 #special-attack {
-    background-color: #ffaf4f;
+  background-color: #ffaf4f;
 }
 
 #special-attack:hover {
-    background-color: #ff9a2b;
+  background-color: #ff9a2b;
 }
 
 #heal {
-    background-color: #aaffb0;
+  background-color: #aaffb0;
 }
 
 #heal:hover {
-    background-color: #76ff7e;
+  background-color: #76ff7e;
 }
 
 #give-up {
-    background-color: #ffffff;
+  background-color: #ffffff;
 }
 
 #give-up:hover {
-    background-color: #c7c7c7;
+  background-color: #c7c7c7;
 }
 </style>
