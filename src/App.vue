@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <h3>game is runnig?: {{ gameIsRunnig }}</h3>
+    <h3>game is runnig?: {{ isRunnig }}</h3>
     <section class="row">
       <div class="small-6 columns">
         <h1 class="text-center">YOU</h1>
@@ -10,10 +10,7 @@
             class="healthbar text-center"
             style="background-color: green; margin: 0; color: white;"
             :style="{width: playerHealth + '%'}"
-            >
-            {{ playerHealth }}
-          
-          </div>
+          >{{ playerHealth }}</div>
         </div>
       </div>
       <div class="small-6 columns">
@@ -22,20 +19,17 @@
           <div
             class="healthbar text-center"
             style="background-color: green; margin: 0; color: white;"
-            :style="{width: MonsterHealth + '%'}"
-            >
-            {{ MonsterHealth }}
-          
-          </div>
+            :style="{width: monsterHealth + '%'}"
+          >{{ monsterHealth }}</div>
         </div>
       </div>
     </section>
-    <section class="row controls">
+    <section class="row controls" v-if="!isRunnig">
       <div class="small-12 columns">
         <button id="start-game" @click="startGame">START NEW GAME</button>
       </div>
     </section>
-    <section class="row controls">
+    <section class="row controls" v-else>
       <div class="small-12 columns">
         <button id="attack" @click="attack">ATTACK</button>
         <button id="special-attack" @click="specialAttack">SPECIAL ATTACK</button>
@@ -58,37 +52,90 @@ export default {
   name: "app",
   data: function() {
     return {
-      playerHealth: 30,
-      MonsterHealth: 45,
-      gameIsRunnig: false
+      playerHealth: 10,
+      monsterHealth: 10,
+      isRunnig: false,
+      turns: []
     };
   },
   methods: {
-   monsterIsAttacking(interval){
-     setInterval(function(){
-       this.playerHealth =  this.playerHealth - 2;
-       var result = (typeof this.playerHealth === 'number');
-       console.log(this.playerHealth + " is number?:" + result);
-       //NaN is number?:true
-     }, interval);
-    
-   },
-    startGame() {
-      this.gameIsRunnig = true;
+    startGame: function() {
       this.playerHealth = 100;
-      this.MonsterHealth = 100;
-      console.log("game status set to: " + this.gameIsRunnig);
-      this.monsterIsAttacking(1000);
-    },    
-    giveUp() {
-      this.gameIsRunnig = false;
-      this.playerHealth = 0;
-      this.MonsterHealth = 0;
-      console.log("game status set to: " + this.gameIsRunnig);
+      this.monsterHealth = 100;
+      this.isRunnig = true;
     },
-    attack(){},
-    specialAttack(){},
-    heal(){}    
+    attack: function() {
+      var damage = this.calculateDamage(3, 10);
+      this.monsterHealth -= damage;
+      this.turns.unshift({
+        isPlayer: true,
+        text: "Player hits Monster for " + damage
+      });
+      if (this.checkWin()) {
+        return;
+      }
+
+      this.monsterAttacks();
+    },
+    specialAttack: function() {
+      var damage = this.calculateDamage(10, 20);
+      this.monsterHealth -= damage;
+      this.turns.unshift({
+        isPlayer: true,
+        text: "Player hits Monster hard for " + damage
+      });
+      if (this.checkWin()) {
+        return;
+      }
+      this.monsterAttacks();
+    },
+    heal: function() {
+      if (this.playerHealth <= 90) {
+        this.playerHealth += 10;
+      } else {
+        this.playerHealth = 100;
+      }
+      this.turns.unshift({
+        isPlayer: true,
+        text: "Player heals for 10"
+      });
+      this.monsterAttacks();
+    },
+    giveUp: function() {
+      this.playerHealth = 100;
+      this.monsterHealth = 100;
+      this.isRunnig = false;
+    },
+    monsterAttacks: function() {
+      var damage = this.calculateDamage(5, 12);
+      this.playerHealth -= damage;
+      this.checkWin();
+      this.turns.unshift({
+        isPlayer: false,
+        text: "Monster hits Player for " + damage
+      });
+    },
+    calculateDamage: function(min, max) {
+      return Math.max(Math.floor(Math.random() * max) + 1, min);
+    },
+    checkWin: function() {
+      if (this.monsterHealth <= 0) {
+        if (confirm("You won! New Game?")) {
+          this.startGame();
+        } else {
+          this.isRunnig = false;
+        }
+        return true;
+      } else if (this.playerHealth <= 0) {
+        if (confirm("You lost! New Game?")) {
+          this.startGame();
+        } else {
+          this.isRunnig = false;
+        }
+        return true;
+      }
+      return false;
+    }
   }
 };
 </script>
@@ -107,7 +154,6 @@ export default {
 }
 
 .healthbar {
-  
   height: 40px;
   background-color: #eee;
   margin: auto;
